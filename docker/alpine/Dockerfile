@@ -46,7 +46,7 @@ RUN apk add --no-cache ca-certificates curl gnupg libcap openssl && \
     gpg --batch --verify docker-base_${DOCKER_BASE_VERSION}_SHA256SUMS.sig docker-base_${DOCKER_BASE_VERSION}_SHA256SUMS && \
     grep ${DOCKER_BASE_VERSION}_linux_amd64.zip docker-base_${DOCKER_BASE_VERSION}_SHA256SUMS | sha256sum -c && \
     unzip docker-base_${DOCKER_BASE_VERSION}_linux_amd64.zip && \
-    cp bin/gosu bin/dumb-init /bin && \
+    cp bin/dumb-init /bin && \
     cd /tmp && \
     rm -rf /tmp/build && \
     apk del gnupg openssl && \
@@ -55,8 +55,8 @@ RUN apk add --no-cache ca-certificates curl gnupg libcap openssl && \
 # Install consul-template
 COPY --from=builder "/consul-template" "/bin/consul-template"
 
-# The agent will be started with /consul-template/config as the configuration directory
-# so you can add additional config files in that location.
+# The agent will be started with /consul-template/config as the configuration
+# directory so you can add additional config files in that location.
 RUN mkdir -p /consul-template/data && \
     mkdir -p /consul-template/config && \
     chown -R consul-template:consul-template /consul-template
@@ -70,6 +70,7 @@ VOLUME /consul-template/data
 COPY "docker/alpine/docker-entrypoint.sh" "/bin/docker-entrypoint.sh"
 RUN chmod +x "/bin/docker-entrypoint.sh"
 ENTRYPOINT ["/bin/docker-entrypoint.sh"]
+USER consul-template:consul-template
 
 # Run consul-template by default
 CMD ["/bin/consul-template"]
